@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hi-Lo Dice Game</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            text-align: center; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f4;
+        }
+        .wallet {
+            position: absolute;
+            left: 20px;
+            top: 20px;
+            background: #f8b400;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: bold;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
+        }
+        .game-container {
+            text-align: center;
+        }
+        .dice-container { 
+            display: flex; 
+            justify-content: center; 
+            margin: 20px; 
+        }
+        .dice { 
+            font-size: 50px; 
+            margin: 10px; 
+            display: inline-block; 
+        }
+        .rolling { 
+            animation: roll 0.5s infinite; 
+        }
+        .bet-container {
+            margin: 15px 0;
+        }
+        .bet-container input {
+            padding: 8px;
+            font-size: 16px;
+            width: 80px;
+            text-align: center;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        .bet-buttons button {
+            margin: 5px;
+            padding: 10px 15px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .bet-buttons button:hover {
+            opacity: 0.8;
+        }
+        .high-btn { background-color: #28a745; color: white; }
+        .mid-btn { background-color: #ffc107; color: black; }
+        .low-btn { background-color: #dc3545; color: white; }
+        #result {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            padding: 10px;
+            border-radius: 5px;
+            display: inline-block;
+        }
+        .win { padding: 1rem; background-color: #28a745; color: white; }
+        .big-win { padding: 1rem; background-color: #ffc107; color: black; }
+        .lose { padding: 1rem; background-color: #dc3545; color: white; }
+        .winnings {
+            color: #28a745;
+        }
+        .losing {
+            color: #dc3545;
+        }
+        @keyframes roll {
+            0% { transform: rotate(0deg); }
+            25% { transform: rotate(90deg); }
+            50% { transform: rotate(180deg); }
+            75% { transform: rotate(270deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <div class="wallet">💰 Balance: <span id="balance"></span> | <span id="winnings">0</span></div>
+    <div class="game-container">
+        <h1>Hi-Lo Dice Game</h1>
+        <div class="bet-container">
+            <label for="bet">Place your bet: 💵</label>
+            <input type="number" id="bet" min="1" value="10">
+        </div>
+        <div class="bet-buttons">
+            <button class="high-btn" onclick="placeBet('high')">⬆️ High (≥12)</button>
+            <button class="mid-btn" onclick="placeBet('mid')">🟰 Mid (=11)</button>
+            <button class="low-btn" onclick="placeBet('low')">⬇️ Low (≤10)</button>
+        </div>
+        <div class="dice-container">
+            <span class="dice" id="dice1">🎲</span>
+            <span class="dice" id="dice2">🎲</span>
+            <span class="dice" id="dice3">🎲</span>
+        </div>
+        <p id="result"></p>
+        <div>
+            <p id="result-message"></p>
+        </div>
+    </div>
+    <script>
+        let balance = 100;
+        $("#balance").text(balance);
+
+        function rollDice() {
+            return Math.floor(Math.random() * 6) + 1;
+        }
+
+        function animateDice() {
+            $(".dice").addClass("rolling");
+            setTimeout(() => {
+                $(".dice").removeClass("rolling");
+            }, 500);
+        }
+
+        function placeBet(type) {
+            let betAmount = parseInt($("#bet").val());
+            if (betAmount > balance || betAmount <= 0) {
+                alert("Invalid bet amount");
+                return;
+            }
+            
+            animateDice();
+
+            $('#dice1').text('🎲')
+            $('#dice2').text('🎲')
+            $('#dice3').text('🎲')
+
+            setTimeout(() => {
+                let d1 = rollDice(), d2 = rollDice(), d3 = rollDice();
+                let sum = d1 + d2 + d3;
+                $("#dice1").text(d1);
+                $("#dice2").text(d2);
+                $("#dice3").text(d3);
+                
+                const total = `You rolled Total: ${sum}`;
+                let message = ''
+                let winnings = 0;
+
+                if (type === 'high' && sum >= 12) {
+                    winnings = betAmount * 2;
+                    message += "You won";
+                    resultClass = "win 😊";
+                } else if (type === 'mid' && sum === 11) {
+                    winnings = betAmount * 5;
+                    message += "You big won 👑";
+                    resultClass = "big-win";
+                } else if (type === 'low' && sum <= 10) {
+                    winnings = betAmount * 2;
+                    message += "You won!";
+                    resultClass = "win 😊";
+                } else {
+                    winnings = -betAmount;
+                    message += "You lose!";
+                    resultClass = "lose 😭";
+                }
+
+                balance += winnings;
+                $("#balance").text(balance);
+                $("#winnings").text(winnings).attr("class", winnings > 0 ? "winnings" : "losing")
+                $("#result").text(total)
+                $("#result-message").text(message).attr("class", resultClass)
+            }, 500);
+        }
+    </script>
+</body>
+</html>
